@@ -3,15 +3,15 @@ import * as ReactDOM from 'react-dom/client'
 
 // 🐨 rename the "state" variable "count" and the "newState" should be "change"
 // 🐨 then the function should return the sum of "count" and "change"
-const countReducer = (state: unknown, newState: number) => newState
+const countReducer = (count: number, change: number) => count + change
 
 function Counter({ initialCount = 0, step = 1 }) {
 	// 🐨 change the dispatch function "setCount" to "changeCount" here
 	const [count, setCount] = useReducer(countReducer, initialCount)
 	// 🐨 update these to simply pass the change we want to make to the state rather
 	// than the new state itself.
-	const increment = () => setCount(count + step)
-	const decrement = () => setCount(count - step)
+	const increment = () => setCount(step)
+	const decrement = () => setCount(-step)
 	return (
 		<div className="counter">
 			<output>{count}</output>
@@ -25,7 +25,7 @@ function Counter({ initialCount = 0, step = 1 }) {
 
 function App() {
 	const [initialCount, setInitialCount] = useState(0)
-	const [step, setStep] = useState(1)
+	const [step, setStep] = useState(5)
 
 	return (
 		<div className="app">

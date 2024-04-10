@@ -16,13 +16,14 @@ function App() {
 
 	useEffect(() => {
 		function updateSearchParams() {
-			// 🐨 switch this to use the callback form and in the callback:
-			// 1. accept the prevParams
-			// 2. create newParams from window.location.search
-			// 3. compare the prevParams.toString() to newParams.toString()
-			// 4. if they're the same, return prevParams
-			// 5. if they're different, return newParams
-			setSearchParamsState(new URLSearchParams(window.location.search))
+			console.log('updating search params')
+			setSearchParamsState(prev => {
+				const newParams = new URLSearchParams(window.location.search)
+
+				const isSame = prev.toString() === newParams.toString()
+				console.log('updateSearchParams', prev.toString(), newParams.toString())
+				return isSame ? prev : newParams
+			})
 		}
 		window.addEventListener('popstate', updateSearchParams)
 		return () => window.removeEventListener('popstate', updateSearchParams)
@@ -36,7 +37,11 @@ function App() {
 		// 2. compare the prevParams.toString() to searchParams.toString()
 		// 3. if they're the same, return prevParams
 		// 4. if they're different, return searchParams
-		setSearchParamsState(searchParams)
+		setSearchParamsState((prev) => {
+			const isSame = prev.toString() === searchParams.toString()
+			console.log('setSearchParamsState', prev.toString(), searchParams.toString())
+			return isSame ? prev : searchParams
+		})
 		return searchParams
 	}
 

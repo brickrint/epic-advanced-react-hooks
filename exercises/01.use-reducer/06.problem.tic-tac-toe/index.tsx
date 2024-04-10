@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import * as ReactDOM from 'react-dom/client'
 import {
 	calculateNextValue,
@@ -55,9 +55,40 @@ const defaultState: GameState = {
 
 const localStorageKey = 'tic-tac-toe'
 
+type GameAction = {type: 'SELECT_SQUARE', index: number} | {type: 'RESTART'} | {type: 'SELECT_STEP', step: number}
 // 🦺 Create a GameAction type here which supports all three types of state changes
 // that can happen for our reducer: SELECT_SQUARE, RESTART, and SELECT_STEP.
+function gameStateReducer(state: GameState, action: GameAction): GameState {
+	switch (action.type) {
+		case 'SELECT_SQUARE': {
+			const { currentStep, history } = state
+			const currentSquares = history[currentStep]
 
+			const nextValue = calculateNextValue(currentSquares)
+			const newHistory = history.slice(0, currentStep + 1)
+			const squares = history[currentStep].with(action.index, nextValue)
+
+			return {
+				...state,
+				history: [...newHistory, squares],
+				currentStep: newHistory.length,
+			}
+		};
+
+		case 'SELECT_STEP': {
+			return {
+				...state,
+				currentStep: action.step
+			}
+		}
+
+		case 'RESTART': return defaultState
+
+		default: {
+			return state
+		}
+	}
+}
 // 🐨 Create a gameStateReducer function which accepts the GameState and GameAction
 // and handle all three types of state changes.
 // 💰 you can borrow lots of the logic from the component below in your implementation
@@ -67,7 +98,7 @@ const localStorageKey = 'tic-tac-toe'
 
 function App() {
 	// 🐨 change this to use useReducer with the gameStateReducer and the getInitialGameState function
-	const [state, setState] = useState<GameState>(() => {
+	const [state, dispatch] = useReducer(gameStateReducer, defaultState, (initial) => {
 		let localStorageValue
 		try {
 			localStorageValue = JSON.parse(
@@ -78,8 +109,9 @@ function App() {
 		}
 		return isValidGameState(localStorageValue)
 			? localStorageValue
-			: defaultState
+			: initial
 	})
+
 	const currentSquares = state.history[state.currentStep]
 
 	const winner = calculateWinner(currentSquares)
@@ -95,21 +127,12 @@ function App() {
 		// then call the dispatch function with the proper type
 		if (winner || currentSquares[index]) return
 
-		setState(previousState => {
-			const { currentStep, history } = previousState
-			const newHistory = history.slice(0, currentStep + 1)
-			const squares = history[currentStep].with(index, nextValue)
-
-			return {
-				history: [...newHistory, squares],
-				currentStep: newHistory.length,
-			}
-		})
+		dispatch({ type: 'SELECT_SQUARE', index})
 	}
 
 	function restart() {
 		// 🐨 update this to use the dispatch function with the proper type
-		setState(defaultState)
+		dispatch({ type: 'RESTART' })
 	}
 
 	const moves = state.history.map((_stepSquares, step) => {
@@ -124,7 +147,7 @@ function App() {
 				<button
 					// 🐨 update this to use the dispatch function with the proper type
 					onClick={() =>
-						setState(previousState => ({ ...previousState, currentStep: step }))
+						dispatch({ type: 'SELECT_STEP', step })
 					}
 					aria-disabled={isCurrentStep}
 					aria-label={label}
