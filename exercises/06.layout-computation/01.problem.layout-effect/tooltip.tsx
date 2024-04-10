@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 type Position = {
@@ -20,7 +20,7 @@ export default function Tooltip({
 
 	// 🐨 change this to useLayoutEffect to ensure it runs synchronously after the
 	// DOM has been updated so the user doesn't see the tooltip jump around.
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const rect = ref.current?.getBoundingClientRect()
 		if (!rect) return
 		const { height } = rect
